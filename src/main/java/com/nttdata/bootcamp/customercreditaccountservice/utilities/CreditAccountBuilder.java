@@ -5,6 +5,7 @@ import com.nttdata.bootcamp.customercreditaccountservice.dto.CreditAccountDto;
 
 public class CreditAccountBuilder {
 
+	private CreditAccountBuilder() {}
 	public static CreditAccount buildCreditPersonal(CreditAccountDto dto) {
 		return CreditAccount.builder()
 				.dni(dto.getDni())

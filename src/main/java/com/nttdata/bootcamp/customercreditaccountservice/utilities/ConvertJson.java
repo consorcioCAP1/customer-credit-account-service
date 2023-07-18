@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ConvertJson {
 	private static final ObjectMapper objectMapper = new ObjectMapper();
 
+	private ConvertJson() {
+	}
     public static String toJson(Object object) throws JsonProcessingException {
         return objectMapper.writeValueAsString(object);
     }

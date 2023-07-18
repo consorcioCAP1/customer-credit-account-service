@@ -30,86 +30,86 @@ public class CustomerCreditAccountServiceImpl implements CustomerCreditAccountSe
 	@Value("${create-credit-debts.api.url}")
     private String createCreditDebtsApiUrl;
 	
-	public final String ACCOUNT_TYPE_CREDIT = "CREDIT";
-	public final String ACCOUNT_TYPE_CARD_CREDIT = "CAR_CREDIT";
+	public static final String ACCOUNT_TYPE_CREDIT = "CREDIT";
+	public static final String ACCOUNT_TYPE_CARD_CREDIT = "CAR_CREDIT";
 
-	public final String CLIENT_TYPE_PERSONAL = "PERSONAL";
-	public final String CLIENT_TYPE_BUSINESS = "BUSINESS";
+	public static final String CLIENT_TYPE_PERSONAL = "PERSONAL";
+	public static final String CLIENT_TYPE_BUSINESS = "BUSINESS";
 	
 	@Override
 	public Mono<CreditAccount> saveCreditAccount(CreditAccountDto creditAccount) {
 		//un cliente personal puede tener solo una cuenta de credito
 		if (creditAccount.getAccountType().equals(ACCOUNT_TYPE_CREDIT) && creditAccount.getTypeCustomer().equals(CLIENT_TYPE_PERSONAL)) {
-			return repository.findByDniAndAccountType(creditAccount.getDni(), creditAccount.getAccountType())
-					.hasElement()
-		            .flatMap(hasElement -> {
-		                if (hasElement) {
-		                	log.info("El cliente : "+creditAccount.getDni() +" ya cuenta con un crédito.");
-		                	return Mono.error(new RuntimeException("El Cliente ya cuenta con un crédito"));
-		                } else {
-		                	log.info("Registrando crédito bancario del cliente: "+ creditAccount.getDni());
-		                	//contruyendo el document CustomerBankAccount
-		                	CreditAccount creditAccountDocument = CreditAccountBuilder.buildCreditPersonal(creditAccount);
-		                	try {
-		                		//invocando a la creacion de las deudas de credito
-								createDebtsAccount(creditAccountDocument);
-							} catch (JsonProcessingException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-		            		return repository.save(creditAccountDocument);		            		
-		                }
-		            });			
-		}
-		else {
+	        return savePersonalCreditAccount(creditAccount);
+	    } else {
 			//si es tarjeta de credito personal construimos su document
-			log.info("registrando cuenta de credito, tipo: " + creditAccount.getAccountType());
-			if(creditAccount.getAccountType().equals(ACCOUNT_TYPE_CARD_CREDIT) && creditAccount.getTypeCustomer().equals(CLIENT_TYPE_PERSONAL)) {
-				CreditAccount creditAccountDocument = CreditAccountBuilder.buildCardCreditPersonal(creditAccount);
-        		return repository.save(creditAccountDocument);
-			}
+	        if (creditAccount.getAccountType().equals(ACCOUNT_TYPE_CARD_CREDIT) && creditAccount.getTypeCustomer().equals(CLIENT_TYPE_PERSONAL)) {
+	            return savePersonalCreditCardAccount(creditAccount);
+	        } 
 			//si es tarjeta de credito empresarial construimos su document
-			else if(creditAccount.getAccountType().equals(ACCOUNT_TYPE_CARD_CREDIT) && creditAccount.getTypeCustomer().equals(CLIENT_TYPE_BUSINESS)) {
-				CreditAccount creditAccountDocument = CreditAccountBuilder.buildCardCreditBusiness(creditAccount);
-        		return repository.save(creditAccountDocument);
-			}
+	        else if (creditAccount.getAccountType().equals(ACCOUNT_TYPE_CARD_CREDIT) && creditAccount.getTypeCustomer().equals(CLIENT_TYPE_BUSINESS)) {
+	            return saveBusinessCreditCardAccount(creditAccount);
+	        }
 			//si es cuenta de credito empresarial construimos su document
-			else {
-				//invocamos a la creacion de deuda de credito
-				CreditAccount creditAccountDocument = CreditAccountBuilder.buildCreditBusiness(creditAccount);
-        		try {
-            		//invocando a la creacion de las deudas de credito
-					createDebtsAccount(creditAccountDocument);
-				} catch (JsonProcessingException e) {
-					e.printStackTrace();
-				}
-				return repository.save(creditAccountDocument);
-			}
-		}		 
+	        else {
+	            return saveBusinessCreditAccount(creditAccount);
+	        }
+	    }
 	}
 
 	//metodo para el consumo de la api de creacion de deudas de credito
-	public void createDebtsAccount(CreditAccount creditAccountDocument) throws JsonProcessingException{
+	public void createDebtsAccount(CreditAccount creditAccountDocument) {
 		CreditdebtDto creditDebts = CreditdebtDto.builder()
 				.bankAccountNumber(creditAccountDocument.getBankAccountNumber())
 				.numberBankPaymentInstallments(creditAccountDocument.getPaymentBankFee())
 				.paymentAmount(creditAccountDocument.getPaymentAmountBankFee())
 				.paymentStartDate(creditAccountDocument.getPaymentStartDate())
 				.build();
-		String objectToJson = ConvertJson.toJson(creditDebts);
-		WebClient webClient = WebClient.create();
-		webClient.post()
-	        .uri(createCreditDebtsApiUrl)
-	        .contentType(MediaType.APPLICATION_JSON)
-	        .body(BodyInserters.fromValue(objectToJson))
-	        .retrieve()
-	        .bodyToMono(String.class)
-	        .subscribe(response -> {
-	            // Preguntar como manejar una respuesta api
-	            log.info("respuesta obtenida de invocar api: "+response);
-        });        
-
+		String objectToJson;
+		try {
+			objectToJson = ConvertJson.toJson(creditDebts);
+			WebClient webClient = WebClient.create();
+			webClient.post()
+		        .uri(createCreditDebtsApiUrl)
+		        .contentType(MediaType.APPLICATION_JSON)
+		        .body(BodyInserters.fromValue(objectToJson))
+		        .retrieve()
+		        .bodyToMono(String.class)
+		        .subscribe();
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		
 	}
-	
 
+	private Mono<CreditAccount> savePersonalCreditAccount(CreditAccountDto creditAccount) {
+	    return repository.findByDniAndAccountType(creditAccount.getDni(), creditAccount.getAccountType())
+	            .hasElement()
+	            .flatMap(hasElement -> {
+	                if (hasElement) {
+	                    log.info("El cliente : " + creditAccount.getDni() + " ya cuenta con un crédito.");
+	                    return Mono.error(new RuntimeException("El Cliente ya cuenta con un crédito"));
+	                } else {
+	                    log.info("Registrando crédito bancario del cliente: " + creditAccount.getDni());
+	                    CreditAccount creditAccountDocument = CreditAccountBuilder.buildCreditPersonal(creditAccount);
+	                    createDebtsAccount(creditAccountDocument);
+	                    return repository.save(creditAccountDocument);
+	                }
+	            });
+	}
+	private Mono<CreditAccount> savePersonalCreditCardAccount(CreditAccountDto creditAccount) {
+	    CreditAccount creditAccountDocument = CreditAccountBuilder.buildCardCreditPersonal(creditAccount);
+	    return repository.save(creditAccountDocument);
+	}
+
+	private Mono<CreditAccount> saveBusinessCreditCardAccount(CreditAccountDto creditAccount) {
+	    CreditAccount creditAccountDocument = CreditAccountBuilder.buildCardCreditBusiness(creditAccount);
+	    return repository.save(creditAccountDocument);
+	}
+
+	private Mono<CreditAccount> saveBusinessCreditAccount(CreditAccountDto creditAccount) {
+	    CreditAccount creditAccountDocument = CreditAccountBuilder.buildCreditBusiness(creditAccount);
+	    createDebtsAccount(creditAccountDocument);
+	    return repository.save(creditAccountDocument);
+	}
 }
