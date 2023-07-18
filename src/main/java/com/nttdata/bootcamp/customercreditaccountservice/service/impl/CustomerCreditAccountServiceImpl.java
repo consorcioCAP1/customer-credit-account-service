@@ -6,7 +6,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nttdata.bootcamp.customercreditaccountservice.documents.CreditAccount;
 import com.nttdata.bootcamp.customercreditaccountservice.dto.CreditAccountDto;
 import com.nttdata.bootcamp.customercreditaccountservice.dto.CreditdebtDto;
