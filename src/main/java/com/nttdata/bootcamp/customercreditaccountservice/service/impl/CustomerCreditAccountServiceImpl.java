@@ -39,15 +39,18 @@ public class CustomerCreditAccountServiceImpl implements CustomerCreditAccountSe
 	@Override
 	public Mono<CreditAccount> saveCreditAccount(CreditAccountDto creditAccount) {
 		//un cliente personal puede tener solo una cuenta de credito
-		if (creditAccount.getAccountType().equals(ACCOUNT_TYPE_CREDIT) && creditAccount.getTypeCustomer().equals(CLIENT_TYPE_PERSONAL)) {
+		if (creditAccount.getAccountType().equals(ACCOUNT_TYPE_CREDIT) 
+				&& creditAccount.getTypeCustomer().equals(CLIENT_TYPE_PERSONAL)) {
 	        return savePersonalCreditAccount(creditAccount);
 	    } else {
 			//si es tarjeta de credito personal construimos su document
-	        if (creditAccount.getAccountType().equals(ACCOUNT_TYPE_CARD_CREDIT) && creditAccount.getTypeCustomer().equals(CLIENT_TYPE_PERSONAL)) {
+	        if (creditAccount.getAccountType().equals(ACCOUNT_TYPE_CARD_CREDIT) 
+	        		&& creditAccount.getTypeCustomer().equals(CLIENT_TYPE_PERSONAL)) {
 	            return savePersonalCreditCardAccount(creditAccount);
 	        } 
 			//si es tarjeta de credito empresarial construimos su document
-	        else if (creditAccount.getAccountType().equals(ACCOUNT_TYPE_CARD_CREDIT) && creditAccount.getTypeCustomer().equals(CLIENT_TYPE_BUSINESS)) {
+	        else if (creditAccount.getAccountType().equals(ACCOUNT_TYPE_CARD_CREDIT) 
+	        			&& creditAccount.getTypeCustomer().equals(CLIENT_TYPE_BUSINESS)) {
 	            return saveBusinessCreditCardAccount(creditAccount);
 	        }
 			//si es cuenta de credito empresarial construimos su document
@@ -91,7 +94,8 @@ public class CustomerCreditAccountServiceImpl implements CustomerCreditAccountSe
 	                    return Mono.error(new RuntimeException("El Cliente ya cuenta con un crédito"));
 	                } else {
 	                    log.info("Registrando crédito bancario del cliente: " + creditAccount.getDni());
-	                    CreditAccount creditAccountDocument = CreditAccountBuilder.buildCreditPersonal(creditAccount);
+	                    CreditAccount creditAccountDocument = CreditAccountBuilder
+	                    		.buildCreditPersonal(creditAccount);
 	                    createDebtsAccount(creditAccountDocument);
 	                    return repository.save(creditAccountDocument);
 	                }
