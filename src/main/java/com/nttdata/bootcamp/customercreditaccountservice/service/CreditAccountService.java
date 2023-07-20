@@ -5,8 +5,9 @@ import com.nttdata.bootcamp.customercreditaccountservice.dto.CreditAccountDto;
 
 import reactor.core.publisher.Mono;
 
-public interface CustomerCreditAccountService {
+public interface CreditAccountService {
 
 	public Mono<CreditAccount> saveCreditAccount(CreditAccountDto creditAccount);
-
+	public Mono<Double> getAccountBalanceByBankAccountNumber(String bankAccountNumber);
+	public Mono<CreditAccount> updateAccountBalance(String bankAccountNumber, Double accountBalance);
 }

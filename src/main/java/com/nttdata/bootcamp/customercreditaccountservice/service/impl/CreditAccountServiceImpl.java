@@ -9,8 +9,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nttdata.bootcamp.customercreditaccountservice.documents.CreditAccount;
 import com.nttdata.bootcamp.customercreditaccountservice.dto.CreditAccountDto;
 import com.nttdata.bootcamp.customercreditaccountservice.dto.CreditdebtDto;
-import com.nttdata.bootcamp.customercreditaccountservice.repository.CustomerCreditAccountRepository;
-import com.nttdata.bootcamp.customercreditaccountservice.service.CustomerCreditAccountService;
+import com.nttdata.bootcamp.customercreditaccountservice.repository.CreditAccountRepository;
+import com.nttdata.bootcamp.customercreditaccountservice.service.CreditAccountService;
 import com.nttdata.bootcamp.customercreditaccountservice.utilities.ConvertJson;
 import com.nttdata.bootcamp.customercreditaccountservice.utilities.CreditAccountBuilder;
 
@@ -22,10 +22,10 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Service
-public class CustomerCreditAccountServiceImpl implements CustomerCreditAccountService{
+public class CreditAccountServiceImpl implements CreditAccountService{
 
 	@Autowired
-	CustomerCreditAccountRepository repository;
+	CreditAccountRepository repository;
 
 	@Value("${create-credit-debts.api.url}")
     private String createCreditDebtsApiUrl;
@@ -59,6 +59,22 @@ public class CustomerCreditAccountServiceImpl implements CustomerCreditAccountSe
 	        }
 	    }
 	}
+	//metodo para obtener el saldo disponible del numero de cuenta
+	@Override
+	public Mono<Double> getAccountBalanceByBankAccountNumber(String bankAccountNumber){
+		return repository.findAccountBalanceByBankAccountNumber(bankAccountNumber)
+	            .map(creditAccount -> creditAccount.getAccountBalance());
+    }
+
+	//metodo para actualizar le account balance en base al numero de cuenta
+	@Override
+	public Mono<CreditAccount> updateAccountBalance(String bankAccountNumber, Double accountBalance) {
+	        return repository.findByBankAccountNumber(bankAccountNumber)
+	                .flatMap(creditAccount -> {
+	                	creditAccount.setAccountBalance(accountBalance);
+	                    return repository.save(creditAccount);
+	                });
+	   }
 
 	//metodo para el consumo de la api de creacion de deudas de credito
 	public void createDebtsAccount(CreditAccount creditAccountDocument) {
