@@ -18,6 +18,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Slf4j
@@ -31,7 +32,7 @@ public class CreditAccountServiceImpl implements CreditAccountService{
     private String createCreditDebtsApiUrl;
 	
 	public static final String ACCOUNT_TYPE_CREDIT = "CREDIT";
-	public static final String ACCOUNT_TYPE_CARD_CREDIT = "CAR_CREDIT";
+	public static final String ACCOUNT_TYPE_CARD_CREDIT = "CREDITCARD";
 
 	public static final String CLIENT_TYPE_PERSONAL = "PERSONAL";
 	public static final String CLIENT_TYPE_BUSINESS = "BUSINESS";
@@ -101,6 +102,16 @@ public class CreditAccountServiceImpl implements CreditAccountService{
 		
 	}
 
+	@Override
+	public Mono<CreditAccount> findByDniAndTypeAccount(String dni, String typeAccount){
+		return repository.findByDniAndAccountType(dni, typeAccount);
+	}
+
+	@Override
+	public Flux<CreditAccount> findByRucAndTypeAccount(String ruc, String typeAccount){
+		return repository.findByRucAndAccountType(ruc, typeAccount);
+	}	
+	
 	private Mono<CreditAccount> savePersonalCreditAccount(CreditAccountDto creditAccount) {
 	    return repository.findByDniAndAccountType(creditAccount.getDni(), creditAccount.getAccountType())
 	            .hasElement()

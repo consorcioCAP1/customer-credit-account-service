@@ -15,6 +15,7 @@ import com.nttdata.bootcamp.customercreditaccountservice.documents.CreditAccount
 import com.nttdata.bootcamp.customercreditaccountservice.dto.CreditAccountDto;
 import com.nttdata.bootcamp.customercreditaccountservice.service.CreditAccountService;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -51,4 +52,17 @@ public class CreditAccountController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    //metodo para obtener cantidad de cuentas en base al dni y tipo cuenta
+    @GetMapping("/findByDniAndTypeAccount/{dni}/{type}")
+    public Mono<CreditAccount> findByDniAndTypeAccount(@PathVariable String dni, @PathVariable String type) {
+        return creditAccountService.findByDniAndTypeAccount(dni, type);
+    }
+    
+    //metodo para obtener cantidad de cuentas en base al dni y tipo cuenta
+    @GetMapping("/findByRucAndTypeAccount/{ruc}/{type}")
+    public Flux<CreditAccount> findByRucAndTypeAccount(@PathVariable String ruc, @PathVariable String type) {
+        return creditAccountService.findByRucAndTypeAccount(ruc, type);
+    }
+
 }
