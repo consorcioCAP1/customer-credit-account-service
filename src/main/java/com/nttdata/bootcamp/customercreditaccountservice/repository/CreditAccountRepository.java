@@ -8,13 +8,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface CreditAccountRepository extends ReactiveMongoRepository<CreditAccount, String>{
-	Mono<CreditAccount> findByDniAndAccountType(String dni, String accountType);
 
 	@Query("{ 'bankAccountNumber' : ?0 }")
 	Mono<CreditAccount> findAccountBalanceByBankAccountNumber(String bankAccountNumber);
 	
 	Mono<CreditAccount> findByBankAccountNumber(String bankAccountNumber);
 	
-	Flux<CreditAccount> findByRucAndAccountType(String ruc, String accountType);
+	Flux<CreditAccount> findByNumberDocumentAndAccountType(String numberDocument, String accountType);
+	
+	Flux<CreditAccount> findByNumberDocument(String numberDocument);
 		
 }

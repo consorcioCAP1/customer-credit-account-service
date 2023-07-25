@@ -104,23 +104,26 @@ public class CreditAccountServiceImpl implements CreditAccountService{
 
 	@Override
 	public Mono<CreditAccount> findByDniAndTypeAccount(String dni, String typeAccount){
-		return repository.findByDniAndAccountType(dni, typeAccount);
+		return repository.findByNumberDocumentAndAccountType(dni, typeAccount).next();
 	}
 
 	@Override
 	public Flux<CreditAccount> findByRucAndTypeAccount(String ruc, String typeAccount){
-		return repository.findByRucAndAccountType(ruc, typeAccount);
+		return repository.findByNumberDocumentAndAccountType(ruc, typeAccount);
 	}	
 	
 	private Mono<CreditAccount> savePersonalCreditAccount(CreditAccountDto creditAccount) {
-	    return repository.findByDniAndAccountType(creditAccount.getDni(), creditAccount.getAccountType())
-	            .hasElement()
+	    return repository.findByNumberDocumentAndAccountType(creditAccount.getNumberDocument(),
+	    				creditAccount.getAccountType())
+	            .next()
+	    		.hasElement()
 	            .flatMap(hasElement -> {
 	                if (hasElement) {
-	                    log.info("El cliente : " + creditAccount.getDni() + " ya cuenta con un crédito.");
+	                    log.info("El cliente : " + creditAccount.getNumberDocument() 
+	                    		+ " ya cuenta con un crédito.");
 	                    return Mono.error(new RuntimeException("El Cliente ya cuenta con un crédito"));
 	                } else {
-	                    log.info("Registrando crédito bancario del cliente: " + creditAccount.getDni());
+	                    log.info("Registrando crédito bancario del cliente: " + creditAccount.getNumberDocument());
 	                    CreditAccount creditAccountDocument = CreditAccountBuilder
 	                    		.buildCreditPersonal(creditAccount);
 	                    createDebtsAccount(creditAccountDocument);
@@ -142,5 +145,10 @@ public class CreditAccountServiceImpl implements CreditAccountService{
 	    CreditAccount creditAccountDocument = CreditAccountBuilder.buildCreditBusiness(creditAccount);
 	    createDebtsAccount(creditAccountDocument);
 	    return repository.save(creditAccountDocument);
+	}
+
+	@Override
+	public Flux<CreditAccount> findByNumberDocument(String numberDocument){
+		return repository.findByNumberDocument(numberDocument);
 	}
 }

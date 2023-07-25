@@ -13,7 +13,8 @@ public class CreditAccountBuilder {
 		LocalDateTime currentDate = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		return CreditAccount.builder()
-				.dni(dto.getDni())
+				.clientName(dto.getClientName())
+				.numberDocument(dto.getNumberDocument())
 				.typeCustomer(dto.getTypeCustomer())
 				.paymentBankFee(dto.getPaymentBankFee())
 				.paymentStartDate(dto.getPaymentStartDate())
@@ -27,7 +28,8 @@ public class CreditAccountBuilder {
 		LocalDateTime currentDate = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		return CreditAccount.builder()
-				.dni(dto.getDni())
+				.clientName(dto.getClientName())
+				.numberDocument(dto.getNumberDocument())
 				.clientId(dto.getClientId())
 				.typeCustomer(dto.getTypeCustomer())
 				.accountType(dto.getAccountType())
@@ -40,8 +42,8 @@ public class CreditAccountBuilder {
 		LocalDateTime currentDate = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		return CreditAccount.builder()
-				.ruc(dto.getRuc())
-				.businessName(dto.getBusinessName())
+				.clientName(dto.getClientName())
+				.numberDocument(dto.getNumberDocument())
 				.clientId(dto.getClientId())
 				.typeCustomer(dto.getTypeCustomer())
 				.accountType(dto.getAccountType())
@@ -54,8 +56,8 @@ public class CreditAccountBuilder {
 		LocalDateTime currentDate = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		return  CreditAccount.builder()
-				.ruc(dto.getRuc())
-				.businessName(dto.getBusinessName())
+				.clientName(dto.getClientName())
+				.numberDocument(dto.getNumberDocument())
 				.clientId(dto.getClientId())
 				.typeCustomer(dto.getTypeCustomer())
 				.paymentBankFee(dto.getPaymentBankFee())

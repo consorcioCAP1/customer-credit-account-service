@@ -65,4 +65,10 @@ public class CreditAccountController {
         return creditAccountService.findByRucAndTypeAccount(ruc, type);
     }
 
+    //metodo para obtener cuentas de credito en base al numero de documento
+    @GetMapping("/findByNumberDocument/{numberDocument}")
+    public Flux<CreditAccount> findByNumberDocument(@PathVariable String numberDocument) {
+        return creditAccountService.findByNumberDocument(numberDocument);
+    }
+
 }

@@ -7,10 +7,8 @@ public class CreditAccountDto {
 	private String id;
 	private String typeCustomer;
 	private String clientId;
-	private String name;
-	private String dni;
-	private String businessName;
-	private String ruc;
+	private String clientName;
+	private String numberDocument;
 	private int paymentBankFee;
 	private String paymentStartDate;
 	private Double paymentAmountBankFee;

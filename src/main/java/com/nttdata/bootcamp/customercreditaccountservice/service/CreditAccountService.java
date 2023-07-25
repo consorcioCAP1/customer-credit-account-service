@@ -13,4 +13,5 @@ public interface CreditAccountService {
 	public Mono<CreditAccount> updateAccountBalance(String bankAccountNumber, Double accountBalance);
 	public Mono<CreditAccount> findByDniAndTypeAccount(String dni, String typeAccount);
 	public Flux<CreditAccount> findByRucAndTypeAccount(String ruc, String typeAccount);
+	public Flux<CreditAccount> findByNumberDocument(String numberDocument);
 }
