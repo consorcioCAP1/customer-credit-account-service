@@ -1,5 +1,8 @@
 package com.nttdata.bootcamp.customercreditaccountservice.service.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -13,6 +16,7 @@ import com.nttdata.bootcamp.customercreditaccountservice.repository.CreditAccoun
 import com.nttdata.bootcamp.customercreditaccountservice.service.CreditAccountService;
 import com.nttdata.bootcamp.customercreditaccountservice.utilities.ConvertJson;
 import com.nttdata.bootcamp.customercreditaccountservice.utilities.CreditAccountBuilder;
+import com.nttdata.bootcamp.customercreditaccountservice.utilities.ExternalApiService;
 
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -36,7 +40,10 @@ public class CreditAccountServiceImpl implements CreditAccountService{
 
 	public static final String CLIENT_TYPE_PERSONAL = "PERSONAL";
 	public static final String CLIENT_TYPE_BUSINESS = "BUSINESS";
-	
+
+	@Autowired
+	ExternalApiService externalApiService;
+
 	@Override
 	public Mono<CreditAccount> saveCreditAccount(CreditAccountDto creditAccount) {
 		//un cliente personal puede tener solo una cuenta de credito
@@ -151,4 +158,20 @@ public class CreditAccountServiceImpl implements CreditAccountService{
 	public Flux<CreditAccount> findByNumberDocument(String numberDocument){
 		return repository.findByNumberDocument(numberDocument);
 	}
+	
+	//metodo que retorna la validación si se posee deuda vencida 
+	public Mono<Boolean> clientHasDebts(String numberDocument) {
+        return repository.findByNumberDocument(numberDocument)
+            .collectList()
+            .flatMap(accounts -> {
+                if (!accounts.isEmpty()) {
+                    List<String> accountNumbers = accounts.stream()
+                            .map(CreditAccount::getBankAccountNumber)
+                            .collect(Collectors.toList());
+                    return externalApiService.getHasDebts(accountNumbers);
+                } else {
+                    return Mono.just(false);
+                }
+            });
+    }
 }
